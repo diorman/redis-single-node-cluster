@@ -1,0 +1,16 @@
+name: Push / PR Builder
+on: push
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test redis:7
+        run: ./test.sh redis:7
+      - name: Test redis:7-alpine
+        run: ./test.sh redis:7-alpine
+      - name: Test redis:6
+        run: ./test.sh redis:6
+      - name: Test redis:6-alpine
+        run: ./test.sh redis:6-alpine
