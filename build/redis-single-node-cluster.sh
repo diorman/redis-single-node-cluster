@@ -22,7 +22,16 @@ create_config() {
 }
 
 configure_cluster_slots() {
-  slots=$(for slot in $(seq 0 16383); do printf "%s " "$slot"; done)
+  min_slot=0
+  max_slot=16383
+  version_major="$(redis-cli INFO | grep 'redis_version:' | sed 's/redis_version://' | cut -d'.' -f1)"
+
+  if [ "$version_major" -ge 7 ]; then
+    redis-cli CLUSTER ADDSLOTSRANGE "$min_slot" "$max_slot" >/dev/null
+    return
+  fi
+
+  slots=$(for slot in $(seq "$min_slot" "$max_slot"); do printf "%s " "$slot"; done)
   set -- $slots
   redis-cli CLUSTER ADDSLOTS "$@" >/dev/null
 }
