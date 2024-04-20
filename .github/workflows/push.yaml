@@ -6,6 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Run shellcheck
+        run: make shellcheck
       - name: Test redis:7
         run: ./test.sh redis:7
       - name: Test redis:7-alpine
