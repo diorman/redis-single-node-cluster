@@ -8,7 +8,7 @@ export REDIS_CONFIG_BIND="${REDIS_CONFIG_BIND:-"* -::*"}"
 export REDIS_CONFIG_CLUSTER_ANNOUNCE_IP="${REDIS_CONFIG_CLUSTER_ANNOUNCE_IP:-$(hostname -i)}"
 
 create_config() {
-  mkdir -p $(dirname $CONFIG)
+  mkdir -p "$(dirname $CONFIG)"
   echo "cluster-enabled yes" > $CONFIG
 
   # Map environment variables with the prefix 'REDIS_CONFIG_' into redis config entries and append
@@ -19,7 +19,7 @@ create_config() {
   #
   env | grep '^REDIS_CONFIG_' | cut -d'=' -f1 | while read -r redis_config_var; do
     redis_config_name="$(echo "$redis_config_var" | sed 's/^REDIS_CONFIG_//' | sed 's/_/-/g' | tr '[:upper:]' '[:lower:]')"
-    echo "$redis_config_name $(eval echo \$${redis_config_var})" >> $CONFIG
+    echo "$redis_config_name $(eval echo \$"${redis_config_var}")" >> $CONFIG
   done
 }
 
@@ -34,14 +34,9 @@ configure_cluster_slots() {
   fi
 
   slots=$(for slot in $(seq "$min_slot" "$max_slot"); do printf "%s " "$slot"; done)
+  # shellcheck disable=SC2086
   set -- $slots
   redis-cli CLUSTER ADDSLOTS "$@" >/dev/null
-}
-
-wait_until_ready() {
-  until redis-cli PING 2>/dev/null | grep PONG >/dev/null; do
-    sleep 1
-  done
 }
 
 log() {
@@ -56,7 +51,7 @@ main() {
   redis-server "$CONFIG" &
 
   log "Waiting for redis server to be ready..."
-  wait_until_ready
+  redis-healthcheck.sh server 5
 
   log "Configuring cluster slots"
   configure_cluster_slots
