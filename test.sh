@@ -18,12 +18,9 @@ run_container() {
 }
 
 wait_cluster_ready() {
-  for run in {1..5}; do
-    if docker exec "$CONTAINER_NAME" redis-cli cluster info | grep "cluster_state:ok" > /dev/null; then
-      return
-    fi
-    sleep 1
-  done
+  if docker exec "$CONTAINER_NAME" redis-healthcheck.sh cluster 5; then
+    return
+  fi
 
   echo "Gave up waiting for cluster to be ready"
   exit 1
@@ -37,7 +34,7 @@ assert() {
   message=$1
   assertion=$2
 
-  if [ ! $assertion ]
+  if [[ ! $assertion ]]
   then
     echo "❌ $message ($assertion)"
     exit 1
