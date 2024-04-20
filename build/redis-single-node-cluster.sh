@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eu
+
 CONFIG="/usr/local/etc/redis/redis-cluster.conf"
 
 export REDIS_CONFIG_BIND="${REDIS_CONFIG_BIND:-"* -::*"}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 
 IMAGE_NAME="local/redis-single-node-cluster"
 CONTAINER_NAME="redis-single-node-cluster-test"
